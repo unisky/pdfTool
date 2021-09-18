@@ -14,12 +14,17 @@ import java.util.Stack;
 public class AddBookMarkTool {
     
     public static void main(String[] args) throws Exception {
-        
-        String sourceFilePath = "test.pdf";
-        String desFilePath = "test2.pdf";
-        String bookMarkFile = "bookMark.txt";
+        String path = "/";
 
-        int startPageOffset = 14;
+        String sourceFilePath = "rfc3550.pdf";
+        String bookMarkFile = "mark.txt";
+        
+        
+        sourceFilePath = path + sourceFilePath;
+        String desFilePath = sourceFilePath + ".pdf";
+        bookMarkFile = path + bookMarkFile;
+
+        int startPageOffset = 0;
     
 
         PDDocument doc = PDDocument.load(new File(sourceFilePath));
@@ -68,13 +73,26 @@ public class AddBookMarkTool {
             throw new RuntimeException();
         }
     
-        int secondPartEnd = line.lastIndexOf(" ");
+    
+        int secondPartEnd = -1;
+        
+        for (int i=line.length()-1;i>=0;i--){
+            if (isDigital(line.charAt(i))){
+                continue;
+            }
+            secondPartEnd = i;
+            break;
+        }
+
         if (secondPartEnd <= 0){
             System.out.println("书签解析有问题，每行信息不是由三部分组成。出问题的行: " + originLine);
             throw new RuntimeException();
         }
-    
+
         String hierarchy = line.substring(0, firstPartEnd);
+        if (hierarchy.charAt(hierarchy.length()-1) == '.'){
+            hierarchy = hierarchy.substring(0, hierarchy.length()-1);
+        }
         hierarchy = hierarchy.trim();
     
         String title = line.substring(firstPartEnd+1, secondPartEnd);
@@ -140,5 +158,17 @@ public class AddBookMarkTool {
         parentItem.addLast(item);
         
         itemStack.add(item);
+    }
+    
+    
+    /**
+     * 是否是数字
+     */
+    private static boolean isDigital(char c){
+        if (c >= '0' && c <= '9'){
+            return true;
+        } else {
+            return false;
+        }
     }
 }
